@@ -3,12 +3,13 @@
   "builds": [
     {
       "src": "src/main.ts",
-      "use": "@nestjs/node"
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/graphql",
+      "methods": ["GET", "POST"],
       "headers": [
         {
           "key": "Content-Type",
