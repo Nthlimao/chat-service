@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "src/main.ts",
-      "use": "@nestjs/cli"
+      "use": "@nestjs/node"
     }
   ],
   "routes": [
