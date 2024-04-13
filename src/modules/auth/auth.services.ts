@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { Auth, RegisterParams } from './auth.model';
 import { BcryptService } from 'src/modules/auth/bscrypt/bcrypt.service';
@@ -37,5 +37,26 @@ export class AuthService {
     } catch (error) {
       throw new Error(error.message);
     }
+  }
+
+  async login(email: string, password: string): Promise<Auth> {
+    const user = await this.userService.findUser(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado');
+    }
+
+    const isValidPassword = await this.bcryptService.comparePassword(
+      password,
+      user.password,
+    );
+
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Senha incorreta');
+    }
+
+    return {
+      access_token: await this.jwtService.createAccessToken(user),
+    };
   }
 }

@@ -17,6 +17,10 @@ export class UserService {
     return created.save() as unknown as User;
   }
 
+  async findUser(email: string): Promise<User & { password: string }> {
+    return await this.userModel.findOne({ email }).select('+password');
+  }
+
   async find(params: Partial<User>): Promise<User> {
     return await this.userModel.findOne({ ...params }).lean();
   }
