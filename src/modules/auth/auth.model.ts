@@ -1,10 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
-@ObjectType()
-export class User {
-  @Field(() => String)
-  id?: string;
-
+@InputType()
+export class RegisterParams {
   @Field(() => String)
   name: string;
 
@@ -13,4 +10,13 @@ export class User {
 
   @Field(() => String)
   email: string;
+
+  @Field(() => String)
+  password: string;
+}
+
+@ObjectType()
+export class Auth {
+  @Field(() => String)
+  access_token: string;
 }
