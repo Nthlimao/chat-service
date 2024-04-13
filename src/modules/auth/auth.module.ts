@@ -1,13 +1,21 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from '../user/user.schema';
+import { JwtModule as NestJwtService } from '@nestjs/jwt';
+import configuration from 'src/config/config.constants';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.services';
+import { JwtService } from './jwt/jwt.service';
+import { UserModule } from '../user/user.module';
+import { BcryptService } from './bscrypt/bcrypt.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    UserModule,
+    NestJwtService.register({
+      global: true,
+      secret: configuration().auth.secret,
+      signOptions: { expiresIn: '60s' },
+    }),
   ],
-  providers: [AuthResolver, AuthService],
+  providers: [AuthResolver, AuthService, BcryptService, JwtService],
 })
 export class AuthModule {}

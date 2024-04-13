@@ -1,16 +1,15 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.services';
-import { RegisterParams } from './auth.entity';
-import { User } from '../user/user.entity';
+import { Auth, RegisterParams } from './auth.model';
 
 @Resolver()
 export class AuthResolver {
   constructor(private authService: AuthService) {}
 
-  @Mutation(() => User)
+  @Mutation(() => Auth)
   register(
     @Args('params', { type: () => RegisterParams }) params: RegisterParams,
-  ): Promise<User> {
+  ): Promise<Auth> {
     return this.authService.register(params);
   }
 }

@@ -1,45 +1,39 @@
-import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { User } from '../user/user.schema';
-import { RegisterParams } from './auth.entity';
+import { Auth, RegisterParams } from './auth.model';
+import { BcryptService } from 'src/modules/auth/bscrypt/bcrypt.service';
+import { UserService } from '../user/user.service';
+import { JwtService } from 'src/modules/auth/jwt/jwt.service';
+import { User } from '../user/user.model';
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly bcryptService: BcryptService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt();
-    return await bcrypt.hash(password, salt);
-  }
-
-  async comparePassword(
-    password: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return await bcrypt.compare(password, hashedPassword);
-  }
-
-  async register(params: RegisterParams): Promise<User> {
+  async register(params: RegisterParams): Promise<Auth> {
     const { phone, email, password } = params;
 
-    const existingUser = await this.userModel.findOne({ phone, email }).lean();
+    const existingUser = await this.userService.find({ phone, email });
 
     if (existingUser) {
       throw new Error('Usuário já cadastrado');
     }
 
     try {
-      const hashedPassword = await this.hashPassword(password);
+      const hashedPassword = await this.bcryptService.hashPassword(password);
 
-      const created = new this.userModel({
+      const created = (await this.userService.create({
         ...params,
         password: hashedPassword,
-      });
+      })) as User;
 
-      return created.save();
+      return {
+        access_token: await this.jwtService.createAccessToken(created),
+      };
     } catch (error) {
       throw new Error(error.message);
     }
